@@ -10,3 +10,31 @@ The project is work-in-progress.
 
 1. Clone the repo with your terminal: `git clone git@github.com:Yojim6o/KCmap.git`
 2. Open the folder kc_map/ and open index.html in the browser of your choice.
+
+
+Todo:
+
+	js-
+
+	    Manipulation of the DOM must utilize the MVVM pattern, but not by using jQuery.
+	    	-remove $(input).keyup function
+
+	    Map needs to be provided with an error handling method
+
+	    Ajax request hasn't been provided to provide location details.
+
+	    put the animate and click event in the same event listener
+
+		suggestion: move marker objects into viewmodel for ease
+
+		dont updatemarkers with jquery
+
+		suggestion: put hamburger icon javascript in KO
+
+	html-
+
+		put a click event on your menu list
+
+	css-
+
+		suggestion: bad practice to use IDs in css files
