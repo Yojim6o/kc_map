@@ -1,108 +1,111 @@
 'use strict';
 
-//set map variable
-var map;
-
 //define map, center and zoom to KC, and call initMarkers
-function initMap() {
-  map = new google.maps.Map(document.getElementById('map'), {
-      center: {lat: 39.076268, lng: -94.590043},
-      zoom: 13,
-      mapTypeControlOptions: {
-          style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-          position: google.maps.ControlPosition.BOTTOM_CENTER
-      }
+var initMap = function(){
+  this.map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat: 39.076268, lng: -94.590043},
+    zoom: 13,
+    mapTypeControlOptions: {
+      position: google.maps.ControlPosition.BOTTOM_CENTER
+    }
   });
-  initMarkers(places);
-}
-
-//create markers for each place in the model
-function initMarkers(places) {
-  for (var i = 0; i < places.length; i++) {
-    places[i].holdMarker = new google.maps.Marker({
-      position: new google.maps.LatLng(places[i].lat, places[i].long),
-      title: places[i].name,
-      map: map
-    });
-
-    var infowindow = new google.maps.InfoWindow();
-
-    //if marker is clicked, display its info window
-    google.maps.event.addListener(places[i].holdMarker, 'click', (function(place, i) {
-      return function () {
-        animateMarker(place, i);
-        infowindow.setContent(places[i].name);
-        infowindow.open(map,this);
-      };
-    })(places[i].holdMarker, i));
-
-    //if nav tool is clicked, display info window above marker
-    var searchNav = $('#spot' + i);
-    searchNav.click((function(place, i) {
-      return function() {
-        animateMarker(place, i);
-        infowindow.setContent(places[i].name);
-        infowindow.open(map,place);
-      };
-    })(places[i].holdMarker, i));
-
-  };
-}
-
-function animateMarker(place, i) {
-  place.setAnimation(google.maps.Animation.BOUNCE);
-  setTimeout(function() {
-    place.setAnimation(null);
-  }, 2100);
-}
-
-//update the visibility of each marker
-function updateMarkers() {
-  for (var i=0; i < places.length; i++) {
-    if (places[i].live === true) {
-      places[i].holdMarker.setMap(map);
-    }
-    else {
-      places[i].holdMarker.setMap(null);
-    }
-  }
-}
-
-//the viewmodel object with search bar input set to no value.
-var viewModel = {
-  query: ko.observable(''),
 };
 
-//set the model to computed observable and immediately invoke
-viewModel.places = ko.pureComputed(function() {
-  var self = this;
-  var search = self.query().toLowerCase();
-  return ko.utils.arrayFilter(places, function(place) {
-    if (place.name.toLowerCase().indexOf(search) >=0) {
-      place.live = true;
-      return place.visible(true);
-    }
-    else {
-      place.live = false;
-      updateMarkers();
-      return place.visible(false);
-    }
-  });
-}, viewModel);
+var viewModel = function(){
 
-//ready aim fire KO
-ko.applyBindings(viewModel);
+  var self = this; 
 
-//bind a keyup function to the search bar that invokes the function updateMarkers
-$("#input").keyup(function() {
-  updateMarkers();
-});
-
-//toggle the visibility of side bar when clicking hamburger icon
-$("#hamburger").click(function () {
-  if ( $('#sidebar').css('z-index') == 0) {
-    $('#sidebar').css('z-index', 10);
-  } else {
-    $('#sidebar').css('z-index', 0);
+  //constructor for each place with a click eventlistener
+  self.place = function(name, lat, long) {
+    this.name = name;
+    this.lat = ko.observable(lat);
+    this.long = ko.observable(long);
+    this.marker = new google.maps.Marker({
+      position: new google.maps.LatLng(lat, long),
+      title: name,
+      map: self.initMap.map,
+    });
+    google.maps.event.addListener(this.marker, 'click', function() {
+      self.selectPlace(this);
+    }.bind(this));
   };
-});
+
+  //animate marker, set content of infowindow
+  self.selectPlace = function(place) {
+    var x = place.marker;
+    x.setAnimation(google.maps.Animation.BOUNCE);
+    setTimeout(function() {
+      x.setAnimation(null);
+    }, 2100);
+    self.infowindow.setContent('<div>' + place.name + '</div>');
+    self.infowindow.open(self.initMap.map, x);
+  }; 
+
+  //updates visibility of each place
+  self.updatePlaces = function(){
+    var i;
+    var placesLength = self.places().length;
+    for (i = 0; i < placesLength; i++) {
+      var thisPlace = self.places()[i];
+      thisPlace.marker.setVisible(false);
+    }
+    for (i = 0; i < placesLength; i++) {
+      var thisPlace = self.visiblePlaces()[i];
+      if (thisPlace) {
+        thisPlace.marker.setVisible(true);
+      }
+    }
+  };
+
+  //update visibility of menu items
+  self.ul = ko.observable(true);
+
+  //initialize map within viewmodel
+  self.initMap = new initMap();
+
+  //track the value of the searchbox input
+  self.searchBox = ko.observable('');
+
+  //the model
+  self.places = ko.observableArray([
+    new self.place('801 Chop House', 39.096980, -94.582418),
+    new self.place('Grinders', 39.091405, -94.578115),
+    new self.place('Jack Stack Barbecue', 39.087237, -94.585817),
+    new self.place('Beer Kitchen', 39.052808, -94.591287),
+    new self.place('Reserve', 39.100631, -94.580513)
+  ]);
+
+  //store length of list
+  var fullList = self.places().length;
+
+  //store value of number of menu items not to show
+  self.hiddenPlaces = ko.observable(0);
+
+  self.infowindow = new google.maps.InfoWindow();
+
+  //compute an array that only contains the visible places
+  self.visiblePlaces = ko.computed(function() {
+    return ko.utils.arrayFilter(self.places(), function(place) {
+      return (
+        place.name.toLowerCase().indexOf(self.searchBox().toLowerCase()) >= 0
+      );
+    });
+  }, self);
+
+  //when visible places is updated, update the markers as well
+  self.visiblePlaces.subscribe(function() {
+    self.updatePlaces();
+  });
+
+  self.placeMenu = ko.computed(function(){
+    return self.visiblePlaces().slice(self.hiddenPlaces(), fullList);
+  });
+
+  self.showMenu = ko.observable(true);
+
+  self.toggleMenu = function() {
+    self.showMenu(!self.showMenu());
+  };
+};
+
+ko.applyBindings(new viewModel());

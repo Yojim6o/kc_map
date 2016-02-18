@@ -9,7 +9,7 @@
   </head>
   <body>
     <header>    
-      <div id="hamburger">
+      <div id="hamburger" data-bind="click: toggleMenu">
         <div></div>
         <div></div>
         <div></div>
@@ -18,19 +18,20 @@
         <h3>KC Spots</h3>
       </div>
     </header>
-    <div id="sidebar">
+    <div id="sidebar" data-bind="visible: showMenu">
       <div class="searchbar">
         <div class="input-group">
-          <input id="input" class="form-control" placeholder="Search for…" type="search" name="q" data-bind="textInput: query, valueUpdate: 'keydown'" autocomplete="off">
+          <input id="input" type="search" placeholder="Search for..." data-bind="value: searchBox, valueUpdate: 'keyup'" autocomplete="off">
         </div>
       </div>
-      <ul data-bind="template: {name:'place', foreach:places}"></ul>
+      <ul style="color: white" data-bind="visible: ul, template: {name: 'place',foreach: placeMenu}">
+      </ul>
     </div>
     <div id="map"></div>
     <script type="text/html" id="place">
-      <div data-bind="visible: visible"><br>
-        <a href="#" data-bind="attr: {id: id}">
-          <li>
+      <div><br>
+        <a href="#">
+          <li data-bind="click:$parent.selectPlace">
             <strong data-bind="text: name"></strong>
           </li>
         </a>
@@ -38,8 +39,7 @@
     </script>
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/knockout/dist/knockout.js"></script>
-    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARFRMphtDllgm1XUFjiuqvsKkYPR5xu_w&callback=initMap"></script>
-    <script src="js/model.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js"></script>
     <script src="js/viewmodel.js"></script>
   </body>
 </html>

@@ -35,7 +35,7 @@ ul {
 .searchbar {
 	margin-top: 33px;
 }
-.input-group {
+.input-group, #input {
 	width: 100%;
 }
 #hamburger {
