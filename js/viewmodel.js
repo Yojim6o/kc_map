@@ -37,7 +37,7 @@ var viewModel = function(){
     setTimeout(function() {
       x.setAnimation(null);
     }, 2100);
-    self.infowindow.setContent('<div>' + place.name + '</div>');
+    self.infowindow.setContent('<div>' + contentString() + '</div>');
     self.infowindow.open(self.initMap.map, x);
   }; 
 
@@ -57,7 +57,7 @@ var viewModel = function(){
     }
   };
 
-  //update visibility of menu items
+  //update visibility of menu items to the DOM
   self.ul = ko.observable(true);
 
   //initialize map within viewmodel
@@ -75,12 +75,91 @@ var viewModel = function(){
     new self.place('Reserve', 39.100631, -94.580513)
   ]);
 
+  self.the4Sstring = '';
+
+  this.get4Sinfo = function(place){
+      var url = 'https://api.foursquare.com/v2/venues/search?client_id=' +
+          'CTMPH2WR0Z3U2DKN33AV0LEGI1RQBM5SCLZBOSHKOVAY4SUA' +
+          '&client_secret=2QGAAF3EERLHRTMLOLK5OAHSMGOJNAI1KFYYYHEECO2L0XEU' + 'v=20130815' +
+          '&ll=' + place.lat() + ',' +
+          place.long() + '&query=\'' + place.name + '\'&limit=1';
+
+      $.getJSON(url).done(function(response){
+          self.the4Sstring = '<p>Foursquare info:<br>';
+          var venue = response.response.venues[0];
+          var venueId = venue.id;
+
+          var venueName = venue.name;
+          if (venueName !== null && venueName !== undefined){
+              self.the4Sstring = self.the4Sstring + 'name: ' +
+                  venueName + '<br>';
+          }
+          var phoneNum = venue.contact.formattedPhone;
+          if (phoneNum !== null && phoneNum !== undefined){
+              self.the4Sstring = self.the4Sstring + 'phone: ' +
+                  phoneNum + '<br>';
+          }
+          var twitterId = venue.contact.twitter;
+          if (twitterId !== null && twitterId !== undefined){
+              self.the4Sstring = self.the4Sstring + 'twitter name: ' +
+                  twitterId + '<br>';
+          }
+          var address = venue.location.formattedAddress;
+          if (address !== null && address !== undefined){
+              self.the4Sstring = self.the4Sstring + 'address: ' +
+                  address + '<br>';
+          }
+          var checkinCount = venue.stats.checkinsCount;
+          if (checkinCount !== null && checkinCount !== undefined){
+              self.the4Sstring = self.the4Sstring + '# of checkins: ' +
+                  checkinCount + '<br>';
+          }
+          var tipCount = venue.stats.tipCount;
+          if (tipCount > 0) {
+              self.get4Stips(venueId, place);
+          }
+          else{
+              self.the4Sstring = self.the4Sstring + '</p>';
+          }
+      })
+      .fail(function(){
+          self.the4Sstring = 'Fouresquare data request failed';
+          console.log('Fouresquare failed to load information' + 
+              'attempting to load error we can get into info window');              
+      });
+  };
+
+  this.get4Stips = function(venueId, place){
+      var url ='https://api.foursquare.com/v2/venues/' + venueId + '/tips' +
+          '?client_id=CTMPH2WR0Z3U2DKN33AV0LEGI1RQBM5SCLZBOSHKOVAY4SUA' +
+          '&client_secret=2QGAAF3EERLHRTMLOLK5OAHSMGOJNAI1KFYYYHEECO2L0XEU';
+
+      $.getJSON(url).done(function(response){
+          var tipCount = Math.min(self.max4Stips,
+              response.response.tips.count);
+          self.the4Sstring = self.the4Sstring + '<br> <ul>';
+          for(var i=0;i<tipCount;i++){
+              self.the4Sstring = self.the4Sstring + '<li>' +
+                  response.response.tips.items[i].text + '</li>';
+          }
+          self.the4Sstring = self.the4Sstring + '</ul></p>';
+          self.infowindow.setContent(self.contentString(false));
+      });
+  };
+
+  self.contentString = function(){
+      var retStr = '<div>' +
+          self.the4Sstring + '</div>';
+      return retStr;
+  };
+
   //store length of list
   var fullList = self.places().length;
 
   //store value of number of menu items not to show
   self.hiddenPlaces = ko.observable(0);
 
+  //create container for infowindows
   self.infowindow = new google.maps.InfoWindow();
 
   //compute an array that only contains the visible places
@@ -97,12 +176,15 @@ var viewModel = function(){
     self.updatePlaces();
   });
 
+  //return visible places to the side menu
   self.placeMenu = ko.computed(function(){
     return self.visiblePlaces().slice(self.hiddenPlaces(), fullList);
   });
 
+  //track the visibility of the sidemenu
   self.showMenu = ko.observable(true);
 
+  //toggle the visibility of the sidemenu
   self.toggleMenu = function() {
     self.showMenu(!self.showMenu());
   };
