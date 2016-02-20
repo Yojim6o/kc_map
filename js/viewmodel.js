@@ -1,6 +1,6 @@
 'use strict';
 
-//define map, center and zoom to KC, and call initMarkers
+//define map, center and zoom to KC
 var initMap = function(){
   this.map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 39.076268, lng: -94.590043},
@@ -37,8 +37,13 @@ var viewModel = function(){
     setTimeout(function() {
       x.setAnimation(null);
     }, 2100);
-    self.infowindow.setContent('<div>' + contentString() + '</div>');
+    self.foursquare(place);
+    self.infowindow.setContent('<div>loading</div>');
     self.infowindow.open(self.initMap.map, x);
+    setTimeout(function() {
+      self.infowindow.setContent('<div>' + self.jsonContent + '</div>');
+      self.infowindow.open(self.initMap.map, x);
+    }, 1000);
   }; 
 
   //updates visibility of each place
@@ -72,85 +77,30 @@ var viewModel = function(){
     new self.place('Grinders', 39.091405, -94.578115),
     new self.place('Jack Stack Barbecue', 39.087237, -94.585817),
     new self.place('Beer Kitchen', 39.052808, -94.591287),
-    new self.place('Reserve', 39.100631, -94.580513)
+    new self.place('The Farmhouse', 39.109373, -94.584818)
   ]);
 
-  self.the4Sstring = '';
+  //the api call
+  this.foursquare = function(place){
 
-  this.get4Sinfo = function(place){
-      var url = 'https://api.foursquare.com/v2/venues/search?client_id=' +
-          'CTMPH2WR0Z3U2DKN33AV0LEGI1RQBM5SCLZBOSHKOVAY4SUA' +
-          '&client_secret=2QGAAF3EERLHRTMLOLK5OAHSMGOJNAI1KFYYYHEECO2L0XEU' + 'v=20130815' +
-          '&ll=' + place.lat() + ',' +
-          place.long() + '&query=\'' + place.name + '\'&limit=1';
+    var url = 'https://api.foursquare.com/v2/venues/search?ll='
+      + place.lat()
+      + ',' 
+      + place.long()
+      + '&client_id=' 
+      + 'CTMPH2WR0Z3U2DKN33AV0LEGI1RQBM5SCLZBOSHKOVAY4SUA'
+      + '&client_secret='
+      + '2QGAAF3EERLHRTMLOLK5OAHSMGOJNAI1KFYYYHEECO2L0XEU'
+      + '&v=20160219';
 
-      $.getJSON(url).done(function(response){
-          self.the4Sstring = '<p>Foursquare info:<br>';
-          var venue = response.response.venues[0];
-          var venueId = venue.id;
+    $.getJSON(url).done(function(response){
 
-          var venueName = venue.name;
-          if (venueName !== null && venueName !== undefined){
-              self.the4Sstring = self.the4Sstring + 'name: ' +
-                  venueName + '<br>';
-          }
-          var phoneNum = venue.contact.formattedPhone;
-          if (phoneNum !== null && phoneNum !== undefined){
-              self.the4Sstring = self.the4Sstring + 'phone: ' +
-                  phoneNum + '<br>';
-          }
-          var twitterId = venue.contact.twitter;
-          if (twitterId !== null && twitterId !== undefined){
-              self.the4Sstring = self.the4Sstring + 'twitter name: ' +
-                  twitterId + '<br>';
-          }
-          var address = venue.location.formattedAddress;
-          if (address !== null && address !== undefined){
-              self.the4Sstring = self.the4Sstring + 'address: ' +
-                  address + '<br>';
-          }
-          var checkinCount = venue.stats.checkinsCount;
-          if (checkinCount !== null && checkinCount !== undefined){
-              self.the4Sstring = self.the4Sstring + '# of checkins: ' +
-                  checkinCount + '<br>';
-          }
-          var tipCount = venue.stats.tipCount;
-          if (tipCount > 0) {
-              self.get4Stips(venueId, place);
-          }
-          else{
-              self.the4Sstring = self.the4Sstring + '</p>';
-          }
-      })
-      .fail(function(){
-          self.the4Sstring = 'Fouresquare data request failed';
-          console.log('Fouresquare failed to load information' + 
-              'attempting to load error we can get into info window');              
-      });
-  };
+      var venue = response.response.venues[0];
 
-  this.get4Stips = function(venueId, place){
-      var url ='https://api.foursquare.com/v2/venues/' + venueId + '/tips' +
-          '?client_id=CTMPH2WR0Z3U2DKN33AV0LEGI1RQBM5SCLZBOSHKOVAY4SUA' +
-          '&client_secret=2QGAAF3EERLHRTMLOLK5OAHSMGOJNAI1KFYYYHEECO2L0XEU';
+      self.jsonContent = "<p>" + venue.name + "</p>";
 
-      $.getJSON(url).done(function(response){
-          var tipCount = Math.min(self.max4Stips,
-              response.response.tips.count);
-          self.the4Sstring = self.the4Sstring + '<br> <ul>';
-          for(var i=0;i<tipCount;i++){
-              self.the4Sstring = self.the4Sstring + '<li>' +
-                  response.response.tips.items[i].text + '</li>';
-          }
-          self.the4Sstring = self.the4Sstring + '</ul></p>';
-          self.infowindow.setContent(self.contentString(false));
-      });
-  };
+    });
 
-  self.contentString = function(){
-      var retStr = '<div>' +
-          self.the4Sstring + '</div>';
-      return retStr;
   };
 
   //store length of list
@@ -190,4 +140,5 @@ var viewModel = function(){
   };
 };
 
+//BAMF!
 ko.applyBindings(new viewModel());
