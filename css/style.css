@@ -24,7 +24,7 @@ ul {
 #map {
 	height: 100%;
 }
-#sidebar {
+.sidebar {
 	height: 100%;
 	width: 230px;
 	background-color: black;
@@ -35,10 +35,14 @@ ul {
 .searchbar {
 	margin-top: 33px;
 }
-.input-group, #input {
+.input-group, .input {
 	width: 100%;
 }
-#hamburger {
+.input {
+    height: 30px;
+    border: none;
+}
+.hamburger {
     cursor: pointer;
     display: inline-block;
     height: 24px;
@@ -48,7 +52,7 @@ ul {
     background-color: black;
     margin-left: 5px;
 }
-#hamburger div {
+.hamburger div {
     background-color: white;
     border-radius: 2px 2px 2px 2px;
     height: 2px;

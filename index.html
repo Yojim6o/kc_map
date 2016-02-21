@@ -9,19 +9,19 @@
   </head>
   <body>
     <header>    
-      <div id="hamburger" data-bind="click: toggleMenu">
+      <div class="hamburger" data-bind="click: toggleMenu">
         <div></div>
         <div></div>
         <div></div>
       </div>
       <div class="title">
-        <h3>KC Spots</h3>
+        <h3 class="error">KC Spots</h3>
       </div>
     </header>
-    <div id="sidebar" data-bind="visible: showMenu">
+    <div class="sidebar" data-bind="visible: showMenu">
       <div class="searchbar">
         <div class="input-group">
-          <input id="input" type="search" placeholder="Search for..." data-bind="value: searchBox, valueUpdate: 'keyup'" autocomplete="off">
+          <input class="input" type="search" placeholder="Search for..." data-bind="value: searchBox, valueUpdate: 'keyup'" autocomplete="off">
         </div>
       </div>
       <ul style="color: white" data-bind="visible: ul, template: {name: 'place',foreach: placeMenu}">

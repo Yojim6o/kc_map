@@ -62,7 +62,16 @@ var viewModel = function(){
     }
   };
 
-  //update visibility of menu items to the DOM
+  //error handler if google is broken
+  if (typeof google !== 'object' || typeof google.maps !== 'object'){
+    $('.error').text("Sorry! There was a problem loading Google Maps Api");
+    $('.hamburger').css('display','none');
+    $('.sidebar').css('display','none');
+    $('header').css('background-color','red');
+    return;
+  }
+
+  //track visibility of menu items in the DOM
   self.ul = ko.observable(true);
 
   //initialize map within viewmodel
@@ -93,11 +102,25 @@ var viewModel = function(){
       + '2QGAAF3EERLHRTMLOLK5OAHSMGOJNAI1KFYYYHEECO2L0XEU'
       + '&v=20160219';
 
-    $.getJSON(url).done(function(response){
+    $.getJSON(url).done(function(response) {
 
       var venue = response.response.venues[0];
 
-      self.jsonContent = "<p>" + venue.name + "</p>";
+      self.jsonContent = "<p><strong>" + venue.name + "</strong></p>"
+      + "<p>" + venue.location.address + "</p>"
+      + "<p>" + venue.contact.formattedPhone + "</p>";
+
+      if (venue.menu.url) {
+        self.jsonContent += "<a href='" + venue.menu.url + "'>Menu</a>";
+      }
+
+      if (venue.menu.url && venue.reservations.url) {
+        self.jsonContent += " | ";
+      }
+
+      if (venue.reservations.url) {
+        self.jsonContent += "<a href='" + venue.reservations.url + "'>Reserve</a>";
+      }
 
     });
 
@@ -112,7 +135,7 @@ var viewModel = function(){
   //create container for infowindows
   self.infowindow = new google.maps.InfoWindow();
 
-  //compute an array that only contains the visible places
+  //filter all the places that match any input characters in the search box
   self.visiblePlaces = ko.computed(function() {
     return ko.utils.arrayFilter(self.places(), function(place) {
       return (
