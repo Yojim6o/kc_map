@@ -126,12 +126,6 @@ var viewModel = function(){
 
   };
 
-  //store length of list
-  var fullList = self.places().length;
-
-  //store value of number of menu items not to show
-  self.hiddenPlaces = ko.observable(0);
-
   //create container for infowindows
   self.infowindow = new google.maps.InfoWindow();
 
@@ -151,7 +145,7 @@ var viewModel = function(){
 
   //return visible places to the side menu
   self.placeMenu = ko.computed(function(){
-    return self.visiblePlaces().slice(self.hiddenPlaces(), fullList);
+    return self.visiblePlaces();
   });
 
   //track the visibility of the sidemenu
