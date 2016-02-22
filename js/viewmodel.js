@@ -20,6 +20,8 @@ var viewModel = function(){
     this.name = name;
     this.lat = ko.observable(lat);
     this.long = ko.observable(long);
+    var x = lat;
+    var y = long;
     this.marker = new google.maps.Marker({
       position: new google.maps.LatLng(lat, long),
       title: name,
@@ -32,6 +34,8 @@ var viewModel = function(){
 
   //animate marker, set content of infowindow
   self.selectPlace = function(place) {
+    self.initMap.map.setCenter(place.marker.position);
+    self.mobileShut();
     var x = place.marker;
     x.setAnimation(google.maps.Animation.BOUNCE);
     setTimeout(function() {
@@ -110,15 +114,15 @@ var viewModel = function(){
       + "<p>" + venue.location.address + "</p>"
       + "<p>" + venue.contact.formattedPhone + "</p>";
 
-      if (venue.menu.url) {
+      if (venue.menu) {
         self.jsonContent += "<a href='" + venue.menu.url + "'>Menu</a>";
       }
 
-      if (venue.menu.url && venue.reservations.url) {
+      if (venue.menu && venue.reservations) {
         self.jsonContent += " | ";
       }
 
-      if (venue.reservations.url) {
+      if (venue.reservations) {
         self.jsonContent += "<a href='" + venue.reservations.url + "'>Reserve</a>";
       }
 
@@ -154,6 +158,13 @@ var viewModel = function(){
   //toggle the visibility of the sidemenu
   self.toggleMenu = function() {
     self.showMenu(!self.showMenu());
+  };
+
+  //shut the navigation if on mobile
+  self.mobileShut = function() {
+    if (window.innerWidth < 500) {
+      self.showMenu(false);
+    }
   };
 };
 
