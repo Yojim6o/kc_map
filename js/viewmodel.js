@@ -20,8 +20,6 @@ var viewModel = function(){
     this.name = name;
     this.lat = ko.observable(lat);
     this.long = ko.observable(long);
-    var x = lat;
-    var y = long;
     this.marker = new google.maps.Marker({
       position: new google.maps.LatLng(lat, long),
       title: name,
@@ -66,7 +64,7 @@ var viewModel = function(){
     }
   };
 
-  //error handler if google is broken
+  // error handler if google is broken
   if (typeof google !== 'object' || typeof google.maps !== 'object'){
     $('.error').text("Sorry! There was a problem loading Google Maps Api");
     $('.hamburger').css('display','none');
@@ -126,7 +124,9 @@ var viewModel = function(){
         self.jsonContent += "<a href='" + venue.reservations.url + "'>Reserve</a>";
       }
 
-    });
+    }).fail(function(){
+      self.jsonContent = 'Foursquare data unavailable.';              
+    });;
 
   };
 
@@ -162,11 +162,8 @@ var viewModel = function(){
 
   //shut the navigation if on mobile
   self.mobileShut = function() {
-    if (window.innerWidth < 500) {
+    if (window.innerWidth < 600) {
       self.showMenu(false);
     }
   };
 };
-
-//BAMF!
-ko.applyBindings(new viewModel());
