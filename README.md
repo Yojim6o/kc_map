@@ -13,14 +13,4 @@ The project is work-in-progress.
 3. Use the search bar to filter your search based on the name of the place you're looking for
 4. Click on either the name on the list or a marker on the map to view information about the place.
 5. If available, you can view the menu or reserve seating at the place you are viewing by clicking on the appropriate links.
-
-Todo:
-    
-  1. Google Maps error handling works, but it uses jQuery to update the DOM which is not allowed for this project.
-
-    	But the instructions for this project specify that all DOM updates should be done using Knockout.js so this function won't meet the project requirements
-
-		  You could try to refactor your code to use a Knockout binding for this error message. Just remember that Knockout.js won't work until the ko.bindings have been applied – and right now your bindings are applied in your initMap() function which only runs when Google Maps data has been successfully returned.
-
-		  The easy solution here is to swap out the DOM message for an alert() box. Not quite as elegant, but effective for meeting the project requirements.
 	

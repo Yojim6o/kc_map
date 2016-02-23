@@ -66,10 +66,11 @@ var viewModel = function(){
 
   // error handler if google is broken
   if (typeof google !== 'object' || typeof google.maps !== 'object'){
-    $('.error').text("Sorry! There was a problem loading Google Maps Api");
-    $('.hamburger').css('display','none');
-    $('.sidebar').css('display','none');
-    $('header').css('background-color','red');
+    // $('.error').text("Sorry! There was a problem loading Google Maps Api");
+    // $('.hamburger').css('display','none');
+    // $('.sidebar').css('display','none');
+    // $('header').css('background-color','red');
+    alert("Sorry! There was a problem loading Google Maps Api");
     return;
   }
 
