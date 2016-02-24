@@ -11,6 +11,11 @@ var initMap = function(){
   });
 };
 
+// error handler if google does not load successfully
+var noLoad = function() {
+  alert("Sorry! There was a problem loading Google Maps Api");
+}
+
 var viewModel = function(){
 
   var self = this; 
@@ -42,10 +47,6 @@ var viewModel = function(){
     self.foursquare(place);
     self.infowindow.setContent('<div>loading</div>');
     self.infowindow.open(self.initMap.map, x);
-    setTimeout(function() {
-      self.infowindow.setContent('<div>' + self.jsonContent + '</div>');
-      self.infowindow.open(self.initMap.map, x);
-    }, 1000);
   }; 
 
   //updates visibility of each place
@@ -64,16 +65,6 @@ var viewModel = function(){
     }
   };
 
-  // error handler if google is broken
-  if (typeof google !== 'object' || typeof google.maps !== 'object'){
-    // $('.error').text("Sorry! There was a problem loading Google Maps Api");
-    // $('.hamburger').css('display','none');
-    // $('.sidebar').css('display','none');
-    // $('header').css('background-color','red');
-    alert("Sorry! There was a problem loading Google Maps Api");
-    return;
-  }
-
   //track visibility of menu items in the DOM
   self.ul = ko.observable(true);
 
@@ -85,7 +76,7 @@ var viewModel = function(){
 
   //the model
   self.places = ko.observableArray([
-    new self.place('801 Chop House', 39.096980, -94.582418),
+    new self.place('Arthur Bryants Barbeque', 39.091479, -94.556124),
     new self.place('Grinders', 39.091405, -94.578115),
     new self.place('Jack Stack Barbecue', 39.087237, -94.585817),
     new self.place('Beer Kitchen', 39.052808, -94.591287),
@@ -97,7 +88,7 @@ var viewModel = function(){
 
     var url = 'https://api.foursquare.com/v2/venues/search?ll='
       + place.lat()
-      + ',' 
+      + ','
       + place.long()
       + '&client_id=' 
       + 'CTMPH2WR0Z3U2DKN33AV0LEGI1RQBM5SCLZBOSHKOVAY4SUA'
@@ -127,7 +118,10 @@ var viewModel = function(){
 
     }).fail(function(){
       self.jsonContent = 'Foursquare data unavailable.';              
-    });;
+    }).always(function(){
+      self.infowindow.setContent('<div>' + self.jsonContent + '</div>');
+      self.infowindow.open(self.initMap.map, x);
+    });
 
   };
 

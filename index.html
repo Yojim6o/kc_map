@@ -39,7 +39,7 @@
     </script>
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/knockout/dist/knockout.js"></script>
-    <script async src="https://maps.googleapis.com/maps/api/js" onload="ko.applyBindings(new viewModel)"></script>
+    <script async src="https://maps.googleapis.com/maps/api/js" onerror="noLoad()" onload="ko.applyBindings(new viewModel)"></script>
     <script src="js/viewmodel.js"></script>
   </body>
 </html>
